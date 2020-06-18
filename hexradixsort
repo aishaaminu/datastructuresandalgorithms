@@ -1,0 +1,92 @@
+import java.io.*;
+import java.math.*;
+import java.security.*;
+import java.text.*;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.regex.*;
+
+class Result {
+
+    /*
+     * Complete the 'hexadecimalRadixSort' function below.
+     *
+     * The function accepts INTEGER_ARRAY arr as parameter.
+     */
+
+  static void countSort(List<Integer> arr,int n, int exp){
+        int[] output = new int[n];
+        
+        //output array
+        //initialize an array count the size of arr, set the values to 0;
+        int[] count = new int[16];
+        Arrays.fill(count,0);
+        //iterate over the input and increment the value of count[input[i]]
+        for(int i=0; i<n;i++) {
+            ++count[(arr.get(i)>>exp & 15)];
+        }
+        //iterate over count, modifying each index to store the cumulative value so far
+        for(int i=1;i<count.length;i++) {
+            count[i] += count[i-1];
+        }
+
+        //iterate over input from right to left, decrementing the corresponding value in count by 1
+       for(int i= n-1;i>=0;i--){
+             int temp =  (arr.get(i)>>exp) &15;
+             output[count[temp ] - 1] = arr.get(i);
+             count[temp]--;
+
+        }
+       
+            //put that element in an array out at the index indicated by count[input[i]]
+            //change original array to sorted
+        for(int i=0;i<arr.size();i++){
+                arr.set(i,output[i]);
+        }
+    }
+    public static void print(List<Integer> arr){
+        for(int element: arr)
+            System.out.print(element+" ");
+    }
+    public static void hexadecimalRadixSort(List<Integer> arr,int n) {
+
+        
+        //find the max in list
+        int max = Collections.max(arr);
+        
+        //go through digits from least significant to most
+        for (int exp = 0;(max >> exp) > 0; exp += 4) { 
+           Result.countSort(arr,n,exp);
+           Result.print(arr);
+           System.out.print("\n");
+        }
+            //print array
+            //in every iteration, use counting sort to sort the array based on the current digit
+            //the sorted result becomes the new input array
+        
+
+    }
+
+
+}
+
+public class Solution {
+    public static void main(String[] args) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+
+        int n = Integer.parseInt(bufferedReader.readLine().trim());
+
+        String[] arrTemp = bufferedReader.readLine().replaceAll("\\s+$", "").split(" ");
+
+        List<Integer> arr = new ArrayList<>();
+
+        for (int i = 0; i < n; i++) {
+            int arrItem = Integer.parseInt(arrTemp[i]);
+            arr.add(arrItem);
+        }
+
+        Result.hexadecimalRadixSort(arr,n);
+
+        bufferedReader.close();
+    }
+}
