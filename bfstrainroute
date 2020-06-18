@@ -1,0 +1,103 @@
+import java.io.*;
+import java.util.*;
+
+public class Solution {
+    //Solution is a graph class that contains a list of nodes,vertices.
+    //A vertex class contains a list of nodes,edges.
+    public ArrayList<Vertex> vertices;
+    private Vertex root;
+    
+    
+    public class Vertex {
+        String value;
+        ArrayList<Integer> edges;
+        Vertex(String value) {
+            this.value = value;
+            edges = new ArrayList<Integer>();
+        }
+    }
+     public Solution() {
+       vertices = new ArrayList<Vertex>();
+        //root= new Vertex();
+    }
+    //add vertex method
+    void addVertex(String data){
+        Vertex cur = new Vertex(data);
+        vertices.add(cur);
+    }
+    void addEdge(int a, int b){
+        vertices.get(a).edges.add(b);
+    }
+    void countRoute(Vertex cur,List<Vertex> visited){
+           // Mark all the vertices as not visited(By default 
+        // set as false)
+  
+        // Create a queue for BFS 
+        Queue<Vertex> queue= new LinkedList<>();
+  
+        // Mark the current node as visited and enqueue it 
+        visited.add(cur); 
+        queue.add(cur); 
+  
+        while (queue.size() != 0){ 
+            // Dequeue a vertex from queue and print it 
+            cur = queue.poll(); 
+            //System.out.print(cur+" "); 
+  
+            // Get all adjacent vertices of the dequeued vertex s 
+            // If a adjacent has not been visited, then mark it 
+            // visited and enqueue it 
+            Iterator<Integer> i = cur.edges.listIterator(); 
+            for (int each:cur.edges){  
+                if (!visited.contains(vertices.get(each))){ 
+                    visited.add(vertices.get(each)); 
+                    queue.add(vertices.get(each)); 
+                } 
+            }
+            
+        }
+    }
+    public int bfs(Vertex cur){
+        int count=0;
+        List<Vertex> visited = new ArrayList<>();
+        //Marking each node as unvisited 
+        for(int i=0;i<vertices.size();i++){ 
+            visited.remove(vertices.get(i)); 
+        } 
+        for(int i=0;i<vertices.size();i++){ 
+            //Checking whether the node is visited or not 
+            if(!visited.contains(vertices.get(i))){ 
+                countRoute(vertices.get(i),visited);
+                count++;
+            } 
+        }
+        return count;
+} 
+
+
+    public static void main(String[] args)throws IOException {
+        
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+
+        int n = Integer.parseInt(bufferedReader.readLine().trim());
+        Solution mygraph =  new Solution();
+        for (int i = 0; i < n; i++) {
+            String line = bufferedReader.readLine();
+            mygraph.addVertex(line);
+        
+        }
+        String x = bufferedReader.readLine();
+        String[] split=x.split(" ");
+        int y = Integer.parseInt(split[1]);
+        for(int j =0;j<y;j++){
+            String line = bufferedReader.readLine();
+            String[] arrTemp=line.split(" ");
+            mygraph.addEdge(Integer.parseInt(arrTemp[0]),Integer.parseInt(arrTemp[1]));
+        }
+        /*for(Vertex each:mygraph.vertices){
+            System.out.println(each.value);
+        }*/
+        System.out.print(mygraph.bfs(mygraph.vertices.get(0)));
+        /* Enter your code here. Read input from STDIN. Print output to STDOUT. Your class should be named Solution. */
+    }
+}
