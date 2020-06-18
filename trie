@@ -1,0 +1,301 @@
+import java.io.*;
+import java.util.*;
+import java.text.*;
+import java.math.*;
+import java.util.regex.*;
+
+public class Solution {
+     private TrieNode root;
+
+    public class TrieNode {
+      public ArrayList<TrieNode> letters;
+      public int isLeaf;
+        public TrieNode(){
+        letters = new ArrayList<TrieNode>();
+        for(int i = 0; i < 26; i++){
+            letters.add(null);
+        }
+        isLeaf = 0;
+        }
+    }
+    public Solution() {
+       root = new TrieNode();
+    }
+    List<String> alphabetical(){
+        List<String> list=new ArrayList<String>();
+        List<String> r=alphabetical(list,root,"");
+        return r;
+        
+    }
+     int getIndex(char character) {
+        return Character.toLowerCase(character) - 'a';
+    }
+ 
+  boolean isEmpty(TrieNode node) {
+    for (TrieNode letter : node.letters) {
+      if (letter != null) {
+        return false;
+      }
+    }
+    return true;
+  }
+    private boolean hasNoChildren(TrieNode currentNode){
+        for (int i = 0; i < currentNode.letters.size(); i++)
+        {
+            if ((currentNode.letters.get(i)) != null)
+                return false;
+        }
+        return true;
+    }
+    static int wordCount(TrieNode root){ 
+        int result = 0; 
+       
+        // Leaf denotes end of a word 
+        if (root.isLeaf==1) 
+            result++; 
+           
+        for (int i = 0; i < root.letters.size(); i++)     
+          if (root.letters.get(i) != null ) 
+             result += wordCount(root.letters.get(i)); 
+          
+        return result;    
+    }
+    int nodeCount(TrieNode root){
+        int result = 0;
+        TrieNode cur= root;
+            result++;
+        for (int i = 0; i < cur.letters.size(); i++) {
+          // If a null pointer is encountered, create a new node with leaf set to false and set the pointer for that letter to the new node.
+            TrieNode letterIndex=cur.letters.get(i);
+          if (letterIndex != null) {
+           result += nodeCount(letterIndex);
+          }
+
+        }
+        return result;
+    }
+    
+    
+    public int lookup(String str) {
+        TrieNode cur = root;
+
+    // For each letter in the word, move current to the pointer for that letter in the current node.
+    for (int i = 0; i < str.length(); ++i) {
+      // If a null pointer is encountered, return false immediately.
+      int index = getIndex(str.charAt(i));
+      if (cur.letters.get(index) == null) {
+        return 0;
+      }
+
+      cur = cur.letters.get(index);
+    }
+
+    // When the end of the word is reached, return the value of leaf for the current node.
+        return cur.isLeaf;
+        //System.out.println("Implement me");
+    }
+    public void insert(String str) {
+        TrieNode cur = root;
+        
+        
+        int newCount = 0;
+
+        // For each letter in the word, move current to the pointer for that letter in the current node.
+        for (int i = 0; i < str.length(); i++) {
+          // If a null pointer is encountered, create a new node with leaf set to false and set the pointer for that letter to the new node.
+          int index = getIndex(str.charAt(i));
+          TrieNode letterIndex=cur.letters.get(index);
+          if (letterIndex == null) {
+            cur.letters.set(index, new TrieNode());
+            newCount++;
+          }
+
+          cur = cur.letters.get(index);
+        }
+            cur.isLeaf = 1;
+  //System.out.println("inserted " + str + " in " + str.length() + " characters and " + newCount + " new nodes.");
+    }    
+        private boolean deleteHelper(String key, TrieNode currentNode, int length, int level){
+            
+            boolean deletedSelf = false;
+             
+            if (level == length){  
+                if (hasNoChildren(currentNode)){
+                    currentNode = null;
+                    deletedSelf = true;
+                }
+             else{
+                    currentNode.isLeaf=0;
+                    deletedSelf = false;
+                }
+            }
+            else{
+                TrieNode childNode = currentNode.letters.get(getIndex(key.charAt(level)));
+                boolean childDeleted = deleteHelper(key, childNode, length, level + 1);
+                
+                if (childDeleted){ 
+                    currentNode.letters.set(getIndex(key.charAt(level)),null); 
+                    if (currentNode.isLeaf==1){
+                        deletedSelf = false;
+                    }
+                 else if (!hasNoChildren(currentNode)){
+                        deletedSelf = false;
+                    }
+                     
+                    else{
+                        currentNode = null;
+                        deletedSelf = true;
+                    }
+                }
+                else{
+                    deletedSelf = false;
+                }
+            }
+            
+            return deletedSelf;
+        }
+   
+       public void remove(String key){
+            deleteHelper(key, root, key.length(), 0);
+    }
+    public int[] info() {
+        int[] arr=new int[2];
+        TrieNode cur=root;
+        int words= wordCount(cur);
+        int nodes = nodeCount(cur);
+        arr[0]=nodes;
+        arr[1]=words;
+        //System.out.println("Implement me");
+        return arr;
+    }
+ 
+    
+    public List<String> alphabetical(List<String> list,TrieNode node,String result) {
+
+        // Leaf denotes end of a word 
+        if(node==null){
+            return list;
+        }
+        
+        if (node.isLeaf==1) {
+            list.add(result);
+        }
+             
+        for ( int i = 0; i < node.letters.size(); i++){
+            if (node.letters.get(i) != null ){
+              String temp= result+(char)(i+'a');
+                 alphabetical(list,node.letters.get(i),temp);
+          }
+            
+        }
+        return list;
+    }
+
+    
+   public void autocomplete(String prefix,int key) {
+       
+       //set cur to root
+       List<String> dummy=new ArrayList<String>();
+       TrieNode cur=root;
+       //iterate over word
+       for(int i=0;i<prefix.length();i++){//find where word is
+           int index=getIndex(prefix.charAt(i));
+           cur=cur.letters.get(index);
+       }
+       
+       //if word is not, return null
+       /*if(cur.letters.get(index)==null){
+           return;
+       }*/
+           if(key==-1){
+              alphabetical(dummy,cur,prefix);
+           }
+           else{
+               printAlpha(cur,prefix,key);
+           }
+       //if -1, call alphabetical from cur
+       
+       //elseprint alpha to a certain depth
+        for(String each:dummy){
+            System.out.print(each+" ");
+        }
+       
+       
+       
+    
+            
+        }
+    public void printAlpha(TrieNode node,String value,int depth){
+        if(depth<0){
+            return;
+        }
+        TrieNode cur=node;
+        //if at bottom, return
+        if(cur==null){
+            return;
+        }
+        //if cur is leaf, print
+        if(cur.isLeaf==1){
+            System.out.print(value+" ");
+        }
+        if(hasNoChildren(cur)){
+            return;
+        }
+       //iterate through letters at node,printing at each of them, with lim-1
+        for(int i=0;i<cur.letters.size();i++){
+            String temp= value+(char)(i+'a');
+            printAlpha(cur.letters.get(i),temp,depth-1);
+
+            
+        }
+    }
+
+       
+ 
+
+
+
+    public static void main(String[] args) throws IOException {
+        /* Enter your code here. Read input from STDIN. Print output to STDOUT. Your class should be named Solution. */
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+
+        int n = Integer.parseInt(bufferedReader.readLine().trim());
+        Solution trie =  new Solution();
+        for (int i = 0; i < n; i++) {
+            String line = bufferedReader.readLine();
+            String[] arrTemp=line.split(" ");
+                if (arrTemp[0].contains("insert")){
+                  trie.insert(arrTemp[1]);
+                }
+                else if(arrTemp[0].contains("lookup")){
+                    
+                    System.out.println(trie.lookup(arrTemp[1]));
+                }
+                else if(arrTemp[0].contains("alphabetical")){
+                    List<String> mylist=trie.alphabetical();
+                    for(String str:mylist){
+                        System.out.println(str);
+                    }
+                 
+                }
+                else if(arrTemp[0].contains("remove")){
+                    trie.remove(arrTemp[1]);
+                }
+                else if(arrTemp[0].contains("info")){
+                    int[] arr=trie.info();
+                    for(int each:arr){
+                        System.out.print(each+" ");
+                    }
+                    System.out.print("\n");
+                }
+                else if(arrTemp[0].contains("autocomplete")){
+                    trie.autocomplete(arrTemp[1],Integer.parseInt(arrTemp[2]));
+                    System.out.print("\n");
+                }
+        }
+
+            
+
+        bufferedReader.close();
+    }
+}
