@@ -1,0 +1,151 @@
+import java.io.*;
+import java.util.*;
+
+public class Solution {
+    public ArrayList<Vertex> vertices;
+    
+    
+    public class Vertex {
+        public String data;
+        public List<Edge> neighbors;
+        public Vertex(String d) {
+            data = d;
+            neighbors = new ArrayList<>();
+        }
+    }
+    public class Edge{
+      public Vertex from;
+      public Vertex to;
+      public int weight;
+      public Edge(Vertex from, Vertex to, int weight){
+        this.from = from;
+        this.to = to;
+        this.weight = weight;
+      }
+        public int getWeight() {
+            return this.weight;
+        }
+        
+    }
+     public Solution() {
+       vertices = new ArrayList<Vertex>();
+    }
+    void addVertex(String x){
+        Vertex cur = new Vertex(x);
+        vertices.add(cur);
+    }
+    void addEdge(int from,int to,int weight){
+        Edge cur = new Edge(vertices.get(from),vertices.get(to),weight);
+        vertices.get(from).neighbors.add(cur);
+    }
+    int getIndex(String current){
+        int x=0;
+        for(Vertex each:vertices){
+          if(each.data.equals(current)){
+            x=vertices.indexOf(each); 
+          }
+      }
+        return x;
+    }
+    
+    //Let MST be an empty minimum spanning tree (set of edges).2.Let Q be an empty min priority queue.(edge weight, to_node, from_node)1.Starting at any arbitrary node, add all its neighbors to Q.2.While MST contains fewer than V-1 edges:A.Pop the lowest weight node N from Q.B.If N is not already in MST, add it to MST and add all its neighbors (that aren’t already in MST) to Q.4.Return the MST.
+    
+    public List<Edge> prims(List<Vertex> vertex) {
+         Comparator<Edge> edgeComparator = new Comparator<Edge>() {
+            @Override
+            public int compare(Edge s1, Edge s2) {
+                return s1.weight - s2.weight;
+            }
+         };
+         //Let MST be an empty minimum spanning tree (set of edges)
+        List<Edge> mst = new ArrayList<>();
+        Set<Vertex> visited = new HashSet<Vertex>();
+    //Let Q be an empty min priority queue.(edge weight, to_node, from_node)
+         PriorityQueue<Edge> q = new PriorityQueue<Edge>(edgeComparator);
+    //Starting at any arbitrary node, add all its neighbors to
+                for(int i=0;i<vertices.get(0).neighbors.size();i++){
+                    /*if(vertices.get(0).neighbors.get(i).from==vertices.get(0).neighbors.get(i).to){
+                            continue;
+                        }*/
+                    q.add(vertices.get(0).neighbors.get(i));
+                   
+                }
+            
+            
+        //While MST contains fewer than V-1 edges:
+           
+         while (mst.size()<vertices.size()-1&&!q.isEmpty()){
+                //Pop the lowest weight node N from Q.
+                Edge temp = q.poll();
+                 //System.out.println(temp.from.data+" "+temp.to.data+" "+temp.weight);
+             if(!mst.contains(temp)){
+                 int index = getIndex(temp.to.data);
+                 if(!visited.contains(temp.to)){
+                     mst.add(temp);
+                     for(int w=0;w<vertices.get(index).neighbors.size();w++){
+                         /*if(vertices.get(index).neighbors.get(w).from==vertices.get(index).neighbors.get(w).to){
+                            continue;
+                        }*/
+                         if(!visited.contains(vertices.get(index).neighbors.get(w))){
+                            q.add(vertices.get(index).neighbors.get(w));
+                             //System.out.println(vertices.get(index).neighbors.get(w).to.data);
+                         }
+                         
+                     }
+                    
+                     if(!visited.contains(temp.from)){
+                          visited.add(temp.from);
+                     }
+                    
+                    if(!visited.contains(temp.to)){
+                          visited.add(temp.to);
+                     }
+                    
+                }
+             }
+             
+            /*else{
+                continue;
+            }*/
+                
+                
+            //If N is not already in MST, add it to MST and add all its neighbors (that arent already in MST) to Q
+                
+            }
+       
+        
+    //Return the MST.
+        
+
+        return mst;
+     }
+   
+
+    public static void main(String[] args)throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+        Solution mygraph =  new Solution();
+        int n = Integer.parseInt(bufferedReader.readLine().trim());
+        List<String> vertex=new ArrayList<>();
+        for(int i=0;i<n;i++){
+            String line= bufferedReader.readLine();
+            mygraph.addVertex(line);
+        }
+        int x = Integer.parseInt(bufferedReader.readLine().trim());
+        for(int j=0;j<x;j++){
+            String line= bufferedReader.readLine();
+            String[] arrTemp=line.split(", ");
+            int from=mygraph.getIndex(arrTemp[0]);
+            int to=mygraph.getIndex(arrTemp[1]);
+            mygraph.addEdge(from,to,Integer.parseInt(arrTemp[2]));
+            mygraph.addEdge(to,from,Integer.parseInt(arrTemp[2]));
+        }
+        List<Edge> mymst=mygraph.prims(mygraph.vertices);
+         int finalSum = 0;
+        for (Edge edge : mymst) {
+          //System.out.println(edge.from.data + " " + edge.to.data + " " + edge.weight);
+          finalSum += edge.weight;
+        }
+        System.out.println(finalSum);
+        /* Enter your code here. Read input from STDIN. Print output to STDOUT. Your class should be named Solution. */
+    }
+}
