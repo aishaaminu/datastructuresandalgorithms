@@ -1,0 +1,95 @@
+import java.io.*;
+import java.util.*;
+
+public class Solution {
+    public ArrayList<Vertex> vertices;
+    private Vertex root;
+    
+    
+    public class Vertex {
+        String value;
+        ArrayList<Integer> edges;
+        Vertex(String value) {
+            this.value = value;
+            edges = new ArrayList<Integer>();
+        }
+    }
+     public Solution() {
+       vertices = new ArrayList<Vertex>();
+        //root= new Vertex();
+    }
+    void addVertex(String data){
+        Vertex cur = new Vertex(data);
+        vertices.add(cur);
+    }
+    void addEdge(int a, int b){
+        vertices.get(a).edges.add(b);
+    }
+    int getIndex(String current){
+        int x=0;
+        for(Vertex each:vertices){
+          if(each.value.equals(current)){
+            x=vertices.indexOf(each); 
+          }
+      }
+        return x;
+    }
+     int findHelper(Vertex current, Vertex end, List<Vertex> visited) {
+    //mark v as visited
+         int path =0;
+        if(current!=end){
+             
+            visited.add(current);
+            //for each vertex vi that has an edge from v:
+            int result=0;
+                for(int each:current.edges){
+                  //if vi is not visited:dfsHelper(vi)
+                  if(!visited.contains(vertices.get(each))){
+                    result=findHelper(vertices.get(each),end,visited);
+                    if (result>path){
+                      path=result;
+                    }
+                  }
+                }
+                //mark v as not visited (backtrack)
+                visited.remove(current);
+                //do any post-processing necessary
+            // TODO
+            
+        }
+        return 1+path;
+     }
+
+    public int findMaxSearchableSpots(Vertex startingPoint,Vertex endPoint) {
+        List<Vertex> visited = new ArrayList<>();
+        return findHelper(startingPoint,endPoint, visited)-1;
+    }
+    public static void main(String[] args)throws IOException {
+        /* Enter your code here. Read input from STDIN. Print output to STDOUT. Your class should be named Solution. */
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+        Solution mygraph =  new Solution();
+        String begin = bufferedReader.readLine();
+        String end = bufferedReader.readLine();
+        int n = Integer.parseInt(bufferedReader.readLine().trim());
+        
+        
+        for (int i = 0; i < n; i++) {
+            String line = bufferedReader.readLine();
+            mygraph.addVertex(line);
+        }
+        int b=mygraph.getIndex(begin);
+        int e=mygraph.getIndex(end);
+        String x = bufferedReader.readLine();
+        String[] split=x.split(" ");
+        int y = Integer.parseInt(split[1]);
+        for(int j =0;j<y;j++){
+            String line = bufferedReader.readLine();
+            String[] arrTemp=line.split(" ");
+            mygraph.addEdge(Integer.parseInt(arrTemp[0]),Integer.parseInt(arrTemp[1]));
+        }
+        
+       System.out.print(mygraph.findMaxSearchableSpots(mygraph.vertices.get(b),mygraph.vertices.get(e)));
+        //System.out.println(g);
+      
+    }
+}
