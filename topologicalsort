@@ -1,0 +1,103 @@
+import java.io.*;
+import java.util.*;
+
+public class Solution {
+    public ArrayList<Vertex> vertices;
+    
+    
+    public class Vertex {
+        String value;
+        ArrayList<Integer> edges;
+        Vertex(String value) {
+            this.value = value;
+            edges = new ArrayList<Integer>();
+        }
+    }
+     public Solution() {
+       vertices = new ArrayList<Vertex>();
+    }
+    void addVertex(String x){
+        Vertex cur = new Vertex(x);
+        vertices.add(cur);
+    }
+    void addEdge(int a, int b){
+        vertices.get(a).edges.add(b);
+    }
+    private void topologicalHelper(int currentVertex,List<Vertex> visited, Stack<Integer> stack){ 
+        // Mark the current node as visited. 
+        visited.add(vertices.get(currentVertex)); 
+  
+        // Recur for all the vertices adjacent to this vertex 
+        for (int adjacentVertex : vertices.get(currentVertex).edges){ 
+            if (!visited.contains(vertices.get(adjacentVertex))){ 
+                topologicalHelper(adjacentVertex, visited, stack); 
+            } 
+        } 
+        
+        
+  
+        // Push current vertex to stack which stores result 
+        stack.push(currentVertex); 
+    }
+    boolean checkIt(char data){
+        for(int i=0;i<vertices.size();i++){
+            if(vertices.get(i).value.contains(String.valueOf(data))){
+                return true;
+            }
+        }
+        return false;
+    }
+  
+     void topologicalSort(){ 
+        Stack<Integer> stack = new Stack<>(); 
+  
+        // Mark all the vertices as not visited 
+        List<Vertex> visited = new ArrayList<>();
+        for (int i = 0; i < vertices.size(); i++){ 
+            visited.remove(vertices.get(i));
+        } 
+  
+        // Call the recursive helper function to store Topological  
+        // Sort starting from all vertices one by one 
+        for (int i = 0; i <vertices.size(); i++){ 
+            if (!visited.contains(vertices.get(i))){ 
+                topologicalHelper(i, visited, stack); 
+            } 
+        } 
+  
+        // Print contents of stack 
+        while (!stack.isEmpty()){
+            char x=(char)('a' + stack.pop());
+            if (checkIt(x)){
+                System.out.print(x + " "); 
+            }
+              
+        } 
+    } 
+    public static void main(String[] args)throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+        Solution mygraph =  new Solution();
+        int n = Integer.parseInt(bufferedReader.readLine().trim());
+        List<String> words=new ArrayList<>();
+        for(int i=0;i<n;i++){
+            String line= bufferedReader.readLine();
+            words.add(line);
+            mygraph.addVertex(line);
+        }
+        for(int i=0;i<words.size()-1;i++){
+            String first = words.get(i);
+            String second = words.get(i+1);
+            for (int j = 0; j < Math.min(first.length(), second.length()); j++){
+                if (first.charAt(j) != second.charAt(j)){
+                    int x= first.charAt(j) - 'a';
+                    int y=second.charAt(j)- 'a';
+                    mygraph.addEdge(x,y); 
+                    break; 
+                } 
+            }
+        }
+        mygraph.topologicalSort();
+        
+        /* Enter your code here. Read input from STDIN. Print output to STDOUT. Your class should be named Solution. */
+    }
+}
