@@ -1,0 +1,227 @@
+import java.io.*;
+import java.util.*;
+
+public class Solution {
+    class HNode {
+    char c;
+    int freq;
+    HNode left;
+    HNode right;
+    boolean isLeaf;
+    String value;
+
+  public HNode(char c, int freq) {
+    this.c = c;
+    this.freq = freq;
+    this.left = null;
+    this.right = null;
+    this.isLeaf=false;
+  }
+};
+
+
+    ArrayList<HNode> data;
+    Map<Character,String> map=new HashMap<>();
+    HNode root;
+
+    public Solution() {
+        data = new ArrayList<>();
+    }
+    
+
+    public HNode extractMin() {
+        HNode temp = data.get(0);
+        swap(0, data.size() - 1);
+        data.remove(temp);
+        heapifyDown(0);
+        return temp;
+    }
+
+    public void insert(HNode val) {
+        data.add(val);
+        heapifyUp(data.size() - 1);
+    }
+
+    public int size() {
+        return data.size();
+    }
+
+    public Boolean empty() {
+        return data.isEmpty();
+    }
+
+    public void print() {
+        for (HNode n : data) {
+            System.out.println(n.c + ": " + n.freq);
+        }
+    }
+
+    public HNode pop() {
+        return extractMin();
+    }
+    public void huffTree(Map<Character,Integer> mytable){
+        TreeMap<Character, Integer> sorted = new TreeMap<>(); 
+  
+        // Copy all data from hashMap into TreeMap 
+        sorted.putAll(mytable); 
+       for(Map.Entry<Character,Integer> each:sorted.entrySet()){
+           HNode temp=new HNode(each.getKey(),each.getValue());
+           //System.out.println(each.getKey()+" , "+each.getValue());
+           insert(temp);
+           
+       }
+        HNode cur;root=null;
+          while (!data.isEmpty()) { 
+                if(data.size()==1){
+                    root=extractMin();
+                    break;
+                }
+//             // first min extract. 
+               HNode x = extractMin();
+             
+  
+//             // second min extarct. 
+              HNode y = extractMin();  
+            int datum = x.freq + y.freq;
+              //System.out.println(datum);
+            // new node f which is equal 
+            HNode f = new HNode('-',datum); 
+  
+            // to the sum of the frequency of the two nodes 
+            // assigning values to the f node. 
+  
+            // first extracted node as left child. 
+           f.left = x;
+            f.left.value="0";
+             if(f.left.c!='-'){
+                 f.left.isLeaf=true;
+             } 
+              
+  
+            // second extracted node as the right child. 
+            f.right = y;
+            f.right.value="1";
+             if(f.right.c!='-'){
+                 f.right.isLeaf=true;
+             }
+              
+  
+            // marking the f node as the root node. 
+            //cur = f; 
+  
+            // add this node to the priority-queue. 
+            insert(f);
+        }
+        
+        buildCode(root, "");
+    } 
+    public void push(HNode val) {
+        insert(val);
+    }
+
+    private void heapifyUp(int idx) {
+        if (idx > 0) {
+            int parent = (idx - 1) / 2;
+            if (data.get(parent).freq > data.get(idx).freq) {
+                swap(parent, idx);
+                heapifyUp(parent);
+            }
+        }
+    }
+
+    private void heapifyDown(int i) {
+        int left = 2 * i + 1;
+        int right = 2 * i + 2;
+        int mini = i;
+        if (left < data.size() && data.get(left).freq < data.get(mini).freq) {
+            mini = left;
+        }
+        if (right < data.size() && data.get(right).freq < data.get(mini).freq) {
+            mini = right;
+        }
+
+        if (mini != i) {
+            swap(mini, i);
+            heapifyDown(mini);
+        }
+    }
+    public Map<Character,Integer> freqTable(String test){
+        Map<Character, Integer> freq = new HashMap<>();
+        for (int i = 0; i < test.length(); i++) {
+            if (!freq.containsKey(test.charAt(i))) {
+                freq.put(test.charAt(i), 0);
+            }
+            freq.put(test.charAt(i), freq.get(test.charAt(i)) + 1);
+        }
+        /*for(int j=0;j<test.length();j++){
+            HNode cur= new HNode(test.charAt(j),freq.get(test.charAt(j)));
+            insert(cur);
+        }*/
+        //System.out.println("Character Frequency Map = " + freq);
+        return freq;
+        
+    }
+    public void buildCode(HNode root, String s){
+    if (root.left == null&& root.right == null) { 
+  
+            // c is the character in the node 
+            map.put(root.c,s); 
+  
+            return; 
+        } 
+  
+        // if we go to left then add "0" to the code. 
+        // if we go to the right add"1" to the code. 
+  
+        // recursive calls for left and 
+        // right sub-tree of the generated tree. 
+        buildCode(root.left, s + "0"); 
+        buildCode(root.right, s + "1"); 
+    }
+     private void encode(String entry){
+         StringBuilder ans= new StringBuilder("");
+         for(int i=0;i<entry.length();i++){
+             char temp = entry.charAt(i);
+             ans.append(map.get(temp));
+         }
+        System.out.println(ans); 
+     }
+     public String decode(String input){
+      String result = "";
+      HNode n = root;
+      for (int i = 0; i < input.length(); i++){
+         char ch = input.charAt(i);
+         if (ch == '0'){
+            n = n.left;
+         }
+         else{
+            n = n.right;
+         }
+         if (n.isLeaf){
+            result = result + n.c;
+            n = root;
+         }
+      }
+      return result;
+   }
+    private void swap(int i, int j) {
+        HNode temp = data.get(i);
+        data.set(i, data.get(j));
+        data.set(j, temp);
+    }
+
+    public static void main(String[] args)throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+        Solution mygraph =  new Solution();   
+        String toEncode= bufferedReader.readLine();
+        String toDecode= bufferedReader.readLine();
+        Map<Character,Integer> freqtable=mygraph.freqTable(toEncode);
+        mygraph.huffTree(freqtable);
+        mygraph.encode(toEncode);
+        String result=mygraph.decode(toDecode);
+        System.out.println(result);
+            //System.out.println("Character Frequency Map = " + freqtable);
+        
+        /* Enter your code here. Read input from STDIN. Print output to STDOUT. Your class should be named Solution. */
+    }
+}
