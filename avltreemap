@@ -1,0 +1,269 @@
+import java.io.*;
+import java.math.*;
+import java.security.*;
+import java.text.*;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.regex.*;
+
+
+
+public class Solution {
+    class Node { //node class
+        public int key;
+        public String value;
+        public Node left;
+        public Node right;
+        public int ht;
+    }
+        public Node root;
+        public Solution() {
+            root = null;
+        }
+        public void put(int key, String val) {
+            root = put(root, key, val);
+        }
+        public String get(int key) {
+            return get(root, key);
+        }
+         public void levelOrder() {
+            levelOrder(root);
+        }
+        public void remove(int key){
+            root=remove(root,key);
+        }
+        
+        int getHeight(Node n) {
+            if (n != null) {
+                return n.ht;
+            }
+            return -1;
+        }
+        boolean isBalanced(Node n) {
+            return n == null ? true 
+            : Math.abs(getBalance(n)) <= 1;
+        }
+        Node rebalance(Node root) {
+        int balance = getBalance(root);
+        if (balance > 1) {
+          // Left cases
+          int leftBalance = getBalance(root.left);
+          if (leftBalance < 0) {
+            // Left Right cases
+            root.left = leftRotation(root.left);
+          } 
+          // Left Left case
+          root = rightRotation(root);
+        }
+         else {
+          int rightBalance = getBalance(root.right);
+          if(rightBalance>0){
+          root.right=rightRotation(root.right);
+          }
+            //if right-left case, right rotate, then left rotate
+          root= leftRotation(root);
+
+          //if right-right case, left rotate
+          // Right cases
+          // TODO
+        }
+
+        return root;
+    }
+
+        int getBalance(Node root) {
+            return getHeight(root.left) - getHeight(root.right);
+        }
+        Node leftRotation(Node curr) {
+            Node temp = curr.right;
+            curr.right = temp.left;
+            temp.left = curr;
+
+            updateHeight(curr);
+            updateHeight(temp);
+
+            return temp;
+        }
+        Node rightRotation(Node curr) {
+            Node temp = curr.left;
+            curr.left = temp.right;
+            temp.right=curr;
+            updateHeight(curr);
+            updateHeight(temp);
+            return temp;
+      }
+        Node minValueNode(Node node) {  
+            Node current = node;  
+
+            /* loop down to find the leftmost leaf */
+            while (current.left != null)  
+            current = current.left;  
+
+            return current;  
+        }  
+        void updateHeight(Node n) {
+        if (n != null) {
+          n.ht = 1 + Math.max(getHeight(n.left), getHeight(n.right));
+        }
+      }
+       //put method
+            //which inserts a key/value pair into the tree map.
+        private Node put(Node n,int key, String value){
+           // If node == null, create a new data node
+            if (n == null) {
+                Node newNode = new Node();
+                newNode.value = value;
+                newNode.key = key;
+                newNode.ht = 0;
+                return newNode;
+            }
+            //Set (L|R) child = insert(value, node.(L|R))
+            if (key <= n.key) {
+              n.left = put(n.left, key, value);
+            } else {
+              n.right = put(n.right, key, value);
+            }
+            //If the current node is unbalanced, determine which case it is and perform the appropriate rotation(s)
+            if (!isBalanced(n)) {
+              n = rebalance(n);
+            }
+                //Update the height of the current node
+            updateHeight(n);
+            return n;
+        }        
+    //get method
+        //return nullptr or value associated with key
+        String get(Node n, int key){
+        if (n == null) {
+          return "Not Found";
+        }
+
+        if (key == n.key) {
+            return n.value;
+        }
+        if (key < n.key) {
+          return get(n.left, key);
+        }
+            //get value corresponding to the key
+            //return value
+        return get(n.right,key);
+        }  
+    //remove method
+        //remove item from the map
+
+    //level order
+        //prints out level order traversal of tree map
+        private void levelOrder(Node n){
+            if(n == null) 
+                return;
+            Queue<Node> q =new LinkedList<Node>();
+            q.add(root);
+            while(true) { 
+
+                // nodeCount (queue size) indicates number of nodes 
+                // at current level. 
+                int nodeCount = q.size(); 
+                if(nodeCount == 0) 
+                    break; 
+
+                // Dequeue all nodes of current level and Enqueue all 
+                // nodes of next level 
+                while(nodeCount > 0) 
+                { 
+                    Node node = q.peek();
+                    int bal=getBalance(node);
+                    System.out.print(node.key+":"+node.value +"("+bal+")"+ " "); 
+                    q.remove(); 
+                    if(node.left != null) 
+                        q.add(node.left); 
+                    if(node.right != null) 
+                        q.add(node.right); 
+                    nodeCount--; 
+                } 
+            } 
+        }
+        private Node remove(Node n, int key){
+            if (n == null){  
+                return n;
+            }
+             if (key < n.key){  
+                n.left = remove(n.left, key);
+             }
+             else if (key > n.key){  
+                n.right = remove(n.right, key);
+             }
+             else{  
+  
+                // node with only one child or no child  
+                if ((n.left == null) || (n.right == null)) {  
+                    Node temp = null;  
+                    if (temp == n.left)  
+                        temp = n.right;  
+                    else
+                        temp = n.left;  
+
+                    // No child case  
+                    if (temp == null) {  
+                        temp = n;  
+                        n = null;  
+                    }  
+                    else // One child case  
+                        n = temp; // Copy the contents of  
+                                    // the non-empty child  
+                }  
+                else{  
+
+                    // node with two children: Get the inorder  
+                    // successor (smallest in the right subtree)  
+                    Node temp = minValueNode(n.right);  
+
+                    // Copy the inorder successor's data to this node  
+                    n.key = temp.key;
+                    n.value=temp.value;
+
+                    // Delete the inorder successor  
+                    n.right = remove(n.right, temp.key);  
+                }       
+            }
+             if (!isBalanced(n)) {
+                n = rebalance(n);
+            }
+            updateHeight(n);
+            return n;
+            
+        }
+            
+        
+    
+    
+    
+    public static void main(String[] args) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+
+        int n = Integer.parseInt(bufferedReader.readLine().trim());
+        Solution tree =  new Solution();
+        for (int i = 0; i < n; i++) {
+            String line = bufferedReader.readLine();
+            String[] arrTemp=line.split(" ");
+                if (arrTemp[0].contains("put")){
+                  tree.put(Integer.parseInt(arrTemp[1]),arrTemp[2]);
+                }
+                else if(arrTemp[0].contains("levelorder")){
+                    tree.levelOrder();
+                    System.out.println();
+                }
+                else if(arrTemp[0].contains("get")){
+                    System.out.println(tree.get(Integer.parseInt(arrTemp[1])));
+                }
+                else if(arrTemp[0].contains("remove")){
+                    tree.remove(Integer.parseInt(arrTemp[1]));
+                }
+            
+        }
+
+            
+
+        bufferedReader.close();
+    }
+ }
+
